@@ -112,7 +112,7 @@ namespace OculusGraphQLApiLib.GraphQL
         public string UriCallback(string uri)
         {
             Logger.Log("Received uri callback, extracting info", "Login");
-            string[] parameters = uri.Replace("oculus://", "").Split('?')[1].Split('&');
+            string[] parameters = uri.Replace("oculus://", "").Replace("intent://", "").Split('?')[1].Split('#')[0].Split('&');
             string token = parameters[0].Split('=')[1];
             string blob = parameters[1].Split('=')[1];
             //Console.WriteLine("token: " + token);

@@ -129,7 +129,7 @@ namespace QuestAppVersionSwitcher
         
         public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request)
         {
-            if (request.Url.ToString().StartsWith("oculus://"))
+            if (request.Url.ToString().StartsWith("oculus://") || request.Url.ToString().StartsWith("intent://"))
             {
                 view.LoadUrl("http://127.0.0.1:" + CoreService.coreVars.serverPort + "?showprocessing=true");
                 try
