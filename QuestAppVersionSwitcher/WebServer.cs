@@ -1482,7 +1482,7 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("GET", "/api/adb/devices", request =>
-            // async version below
+            server.AddRoute("GET", "/api/adb/devices", async request =>
             {
                 var devices = await AdbWrapper.GetDevicesAsync();
                 request.SendString(JsonConvert.SerializeObject(devices), "application/json");
@@ -1511,7 +1511,7 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/pair", request =>
-            // async version below
+            server.AddRoute("POST", "/api/adb/pair", async request =>
             {
                 var r = JsonConvert.DeserializeObject<dynamic>(request.bodyString);
                 try
@@ -1525,14 +1525,14 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("GET", "/api/adb/port", request =>
-            // async version below
+            server.AddRoute("GET", "/api/adb/port", async request =>
             {
                 var port = await AdbWrapper.GetAdbWiFiPortAsync();
                 request.SendString(port.ToString(), "text/plain");
                 return true;
             });
             server.AddRoute("POST", "/api/adb/connect", request =>
-            // async version below
+            server.AddRoute("POST", "/api/adb/connect", async request =>
             {
                 var r = JsonConvert.DeserializeObject<dynamic>(request.bodyString);
                 try
@@ -1547,7 +1547,7 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/togglewireless", request =>
-            // async version below
+            server.AddRoute("POST", "/api/adb/togglewireless", async request =>
             {
                 try
                 {
@@ -1561,7 +1561,7 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/makepersistent", request =>
-            // async version below
+            server.AddRoute("POST", "/api/adb/makepersistent", async request =>
             {
                 try
                 {
@@ -1575,8 +1575,7 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/command", request =>
-            {
-            // async version below
+            server.AddRoute("POST", "/api/adb/command", async request =>
             {
                 var r = JsonConvert.DeserializeObject<dynamic>(request.bodyString);
                 var result = await AdbWrapper.RunShellCommand(null, r.command.ToString());
