@@ -8,7 +8,6 @@ using ComputerUtils.Android.Logging;
 
 namespace DanTheMan827.OnDeviceADB
 {
-     
     /// <summary>
     /// A class for managing the adb server.
     /// </summary>
@@ -18,7 +17,9 @@ namespace DanTheMan827.OnDeviceADB
         private static string? CacheDir => AndroidCore.context?.CacheDir?.Path;
         private static string? NativeLibsDir => AndroidCore.context.ApplicationInfo?.NativeLibraryDir;
         private Process? ServerProcess { get; set; }
-        public static AdbServer Instance { get; set; }
+        private CancellationTokenSource? CancelToken { get; set; }
+        public static int AdbPort = 5037;
+        public static AdbServer Instance { get; private set; } = new AdbServer();
 
         /// <summary>
         /// Path to the adb binary.
@@ -30,99 +31,96 @@ namespace DanTheMan827.OnDeviceADB
         /// </summary>
         public bool IsRunning => ServerProcess != null && !ServerProcess.HasExited;
 
-        public AdbServer()
+        private AdbServer() { }
+
+        private async Task StartServerAsync(string arguments)
         {
-            Debug.Assert(FilesDir != null);
-            Debug.Assert(CacheDir != null);
-            Debug.Assert(NativeLibsDir != null);
-            Debug.Assert(AdbPath != null);
-            Instance = this;
-        }
-        private void StartServer(string arguments)
-        {
-            Thread t = new Thread(() =>
+            Debug.Assert(ServerProcess == null);
+            Debug.Assert(CancelToken == null);
+
+            var adbInfo = new ProcessStartInfo(AdbPath, arguments);
+            adbInfo.WorkingDirectory = FilesDir;
+            adbInfo.UseShellExecute = false;
+            adbInfo.RedirectStandardOutput = true;
+            adbInfo.RedirectStandardError = true;
+            adbInfo.EnvironmentVariables["HOME"] = FilesDir;
+            adbInfo.EnvironmentVariables["TMPDIR"] = CacheDir;
+            adbInfo.EnvironmentVariables["ADB_MDNS"] = "0";
+            adbInfo.EnvironmentVariables["ADB_MDNS_AUTO_CONNECT"] = "";
+
+            Logger.Log("Starting adb server process from " + adbInfo.FileName + " with arguments " + adbInfo.Arguments);
+            ServerProcess = Process.Start(adbInfo);
+
+            if (ServerProcess == null)
             {
-                // Create and configure the ProcessStartInfo.
-                var adbInfo = new ProcessStartInfo(AdbPath, arguments);
-                adbInfo.WorkingDirectory = FilesDir;
-                adbInfo.UseShellExecute = false;
-                adbInfo.RedirectStandardOutput = true;
-                adbInfo.RedirectStandardError = true;
-                adbInfo.EnvironmentVariables["HOME"] = FilesDir;
-                adbInfo.EnvironmentVariables["TMPDIR"] = CacheDir;
+                Logger.Log("Adb server failed to start", LoggingType.Error);
+                throw new Exception("adb server failed to start");
+            }
 
-                // Start the process
-                Logger.Log("Starting adb server process from " + adbInfo.FileName + " with arguments " + adbInfo.Arguments);
-                ServerProcess = Process.Start(adbInfo);
+            CancelToken?.Dispose();
+            CancelToken = new CancellationTokenSource();
+            CancelToken.Token.Register(() => ServerProcess.Kill());
 
-                if (ServerProcess == null)
-                {
-                    Logger.Log("Adb server failed to start", LoggingType.Error);
-                }
-                
-                // Wait for the server to exit
+            // Optionally log output/error asynchronously
+            _ = Task.Run(async () =>
+            {
                 while (!ServerProcess.StandardError.EndOfStream)
                 {
-                    Logger.Log(ServerProcess.StandardError.ReadLine());
+                    var line = await ServerProcess.StandardError.ReadLineAsync();
+                    Logger.Log(line);
                 }
+            });
+            _ = Task.Run(async () =>
+            {
                 while (!ServerProcess.StandardOutput.EndOfStream)
                 {
-                    Logger.Log(ServerProcess.StandardOutput.ReadLine());
+                    var line = await ServerProcess.StandardOutput.ReadLineAsync();
+                    Logger.Log(line);
                 }
-                ServerProcess.WaitForExit(); 
-                // Log standard output and error
-                Logger.Log("Adb server exited", LoggingType.Error);
-
-                // Dispose our variables.
-                DisposeVariables(false);
             });
-            t.Start();
-        }
 
-        private void KillServer()
-        {
-            
-            if (ServerProcess != null && !ServerProcess.HasExited)
-            {
-                ServerProcess.Kill();
-            }
+            await ServerProcess.WaitForExitAsync();
+
+            Logger.Log("Adb server exited", LoggingType.Error);
+            DisposeVariables(false);
         }
 
         private void DisposeVariables(bool attemptKill)
         {
-            // Stop the server
             if (attemptKill && ServerProcess != null && !ServerProcess.HasExited)
             {
-                KillServer();
+                ServerProcess.Kill();
             }
 
-            // Cleanup the token and process
             ServerProcess?.Dispose();
             ServerProcess = null;
+
+            CancelToken?.Dispose();
+            CancelToken = null;
         }
 
         /// <summary>
         /// Starts the server if not already running.
         /// </summary>
-        public void Start()
+        public async Task StartAsync()
         {
             if (!IsRunning)
             {
-                StartServer("server nodaemon");
+                await StartServerAsync($"-P {AdbPort} server nodaemon");
             }
         }
 
         /// <summary>
         /// Stops the server if running.
         /// </summary>
-        public void Stop() => DisposeVariables(true);
+        public void Stop(bool force = true) => DisposeVariables(force);
 
         public void Dispose() => Stop();
 
-        public void Pair(string rPort, string rCode)
+        public async Task PairAsync(string rPort, string rCode)
         {
-            KillServer();
-            StartServer("pair 127.0.0.1:" + rPort + " " + rCode);
+            Stop(true);
+            await StartServerAsync($"pair 127.0.0.1:{rPort} {rCode}");
         }
     }
 }

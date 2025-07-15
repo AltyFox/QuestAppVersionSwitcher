@@ -646,31 +646,31 @@ namespace QuestAppVersionSwitcher
                 request.SendString(GenericResponse.GetResponse("Changed port to " + request.bodyString + ". Restart QuestAppVersionSwitcher for the changes to take affect.", true), "application/json");
                 return true;
             });
-			/* FS loading for dev if wanted
+            /* FS loading for dev if wanted
             server.AddRoute("GET", "/script.js", new Func<ServerRequest, bool>(request =>
-			{
-				request.SendFileFS(CoreService.coreVars.QAVSDir + "script.js");
-				return true;
+            {
+                request.SendFileFS(CoreService.coreVars.QAVSDir + "script.js");
+                return true;
             }));
-			server.AddRoute("GET", "/style.css", new Func<ServerRequest, bool>(request =>
-			{
-				request.SendFileFS(CoreService.coreVars.QAVSDir + "style.css");
-				return true;
-			}));
-			server.AddRoute("GET", "/", new Func<ServerRequest, bool>(request =>
-			{
-				request.SendFileFS(CoreService.coreVars.QAVSDir + "index.html");
-				return true;
-			}));
+            server.AddRoute("GET", "/style.css", new Func<ServerRequest, bool>(request =>
+            {
+                request.SendFileFS(CoreService.coreVars.QAVSDir + "style.css");
+                return true;
+            }));
+            server.AddRoute("GET", "/", new Func<ServerRequest, bool>(request =>
+            {
+                request.SendFileFS(CoreService.coreVars.QAVSDir + "index.html");
+                return true;
+            }));
             */
-			server.AddRoute("GET", "/api/cosmetics/types", request =>
+            server.AddRoute("GET", "/api/cosmetics/types", request =>
             {
                 string game = request.queryString.Get("game");
                 if (game == null) game = CoreService.coreVars.currentApp;
                 request.SendString(JsonSerializer.Serialize(CoreVars.cosmetics.GetCosmeticsGame(game)), "application/json");
                 return true;
             });
-			server.AddRoute("GET", "/api/cosmetics/getinstalled", request =>
+            server.AddRoute("GET", "/api/cosmetics/getinstalled", request =>
             {
                 string game = request.queryString.Get("game");
                 if (game == null) game = CoreService.coreVars.currentApp;
@@ -684,7 +684,7 @@ namespace QuestAppVersionSwitcher
                 request.SendString(JsonSerializer.Serialize(CoreVars.cosmetics.GetInstalledCosmetics(game, typeid)), "application/json");
                 return true;
             });
-			server.AddRoute("DELETE", "/api/cosmetics/delete", request =>
+            server.AddRoute("DELETE", "/api/cosmetics/delete", request =>
             {
                 string game = request.queryString.Get("game");
                 if (game == null) game = CoreService.coreVars.currentApp;
@@ -705,10 +705,10 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
 
-			server.AddRouteFile("/", "html/index.html");
+            server.AddRouteFile("/", "html/index.html");
             server.AddRouteFile("/diff", "html/diff/diff.html");
             server.AddRouteFile("/scotlandforever.mp3", "html/scotlandforever.mp3");
-			server.AddRouteFile("/setup", "html/setup.html");
+            server.AddRouteFile("/setup", "html/setup.html");
             server.AddRouteFile("/pair", "html/pair.html");
             server.AddRouteFile("/adb", "html/adb.html");
             server.AddRouteFile("/flows/beat_saber_modding", "html/flows/beat_saber_modding.html");
@@ -730,7 +730,7 @@ namespace QuestAppVersionSwitcher
                 serverRequest.SendString(JsonSerializer.Serialize(AndroidDevice.GetCurrent()), "application/json");
                 return true;
             });
-			server.AddRoute("POST", "/api/android/launch", serverRequest =>
+            server.AddRoute("POST", "/api/android/launch", serverRequest =>
             {
                 serverRequest.SendString(GenericResponse.GetResponse("Launching " + CoreService.coreVars.currentApp, true), "application/json");
                 // get package from query string if any
@@ -744,7 +744,7 @@ namespace QuestAppVersionSwitcher
                 t.Schedule(new LaunchAppTask(), 2000);
                 return true;
             });
-			server.AddRoute("GET", "/api/android/installedappsandbackups", serverRequest =>
+            server.AddRoute("GET", "/api/android/installedappsandbackups", serverRequest =>
             {
                 List<AndroidApp> apps = AndroidService.GetInstalledApps();
 
@@ -900,7 +900,7 @@ namespace QuestAppVersionSwitcher
                 serverRequest.SendString(JsonSerializer.Serialize(new About { browserIPs = server.ips, version = CoreService.version.ToString() }), "application/json");
                 return true;
             });
-			server.AddRoute("POST", "/api/android/uploadandinstallapk", serverRequest =>
+            server.AddRoute("POST", "/api/android/uploadandinstallapk", serverRequest =>
             {
                 TempFile tmpFile = new TempFile();
                 tmpFile.Path += ".apk";
@@ -946,7 +946,7 @@ namespace QuestAppVersionSwitcher
                 serverRequest.SendString(GenericResponse.GetResponse("Opened file picker", true), "application/json");
                 return true;
             });
-			server.AddRoute("GET", "/api/backups", serverRequest =>
+            server.AddRoute("GET", "/api/backups", serverRequest =>
             {
                 if (serverRequest.queryString.Get("package") == null)
                 {
@@ -1423,7 +1423,7 @@ namespace QuestAppVersionSwitcher
                 serverRequest.SendString(GenericResponse.GetResponse("Downloading!", true), "application/json");
                 return true;
             });
-			server.AddRoute("POST", "/api/canceldownload", serverRequest =>
+            server.AddRoute("POST", "/api/canceldownload", serverRequest =>
             {
                 managers.Find(x => x.backupName == serverRequest.queryString.Get("name")).StopDownload();
                 serverRequest.SendString(GenericResponse.GetResponse("Canceled download", true));
@@ -1435,7 +1435,7 @@ namespace QuestAppVersionSwitcher
                 serverRequest.SendString(GenericResponse.GetResponse("Canceled download", true));
                 return true;
             });
-			server.AddRoute("GET", "/api/downloads", serverRequest =>
+            server.AddRoute("GET", "/api/downloads", serverRequest =>
             {
                 DownloadStatus status = new DownloadStatus();
                 foreach (DownloadManager m in managers)
@@ -1463,7 +1463,7 @@ namespace QuestAppVersionSwitcher
                 request.SendString(JsonSerializer.Serialize(u.CheckUpdate()), "application/json");
                 return true;
             });
-			server.AddRoute("POST", "/api/questappversionswitcher/update", request =>
+            server.AddRoute("POST", "/api/questappversionswitcher/update", request =>
             {
                 Updater u = new Updater(CoreService.version.ToString().Substring(0, CoreService.version.ToString().Length - 2), "https://github.com/ComputerElite/QuestAppVersionSwitcher", "QuestAppVersionSwitcher"); ;
                 request.SendString(GenericResponse.GetResponse("Downloading apk, one second please", true), "application/json");
@@ -1482,8 +1482,10 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("GET", "/api/adb/devices", request =>
+            server.AddRoute("GET", "/api/adb/devices", async request =>
             {
-                request.SendString(JsonSerializer.Serialize(AdbWrapper.GetDevices()), "application/json");
+                var devices = await AdbWrapper.GetDevicesAsync();
+                request.SendString(JsonConvert.SerializeObject(devices), "application/json");
                 return true;
             });
             server.AddRoute("POST", "/api/adb/downloadlauncher", request =>
@@ -1509,12 +1511,12 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/pair", request =>
+            server.AddRoute("POST", "/api/adb/pair", async request =>
             {
-                AdbRequest r = JsonSerializer.Deserialize<AdbRequest>(request.bodyString);
+                var r = JsonConvert.DeserializeObject<dynamic>(request.bodyString);
                 try
                 {
-                    ExitInfo i = AdbWrapper.RunAdbCommand("pair 127.0.0.1:" + r.port + " " + r.code);
-                    if(i.ExitCode != 0) throw new Exception("Failed to pair: " + i);
+                    await AdbServer.Instance.PairAsync(r.port.ToString(), r.code.ToString());
                     request.SendString(GenericResponse.GetResponse("Paired", true), "application/json");
                 } catch (Exception e)
                 {
@@ -1523,17 +1525,19 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("GET", "/api/adb/port", request =>
+            server.AddRoute("GET", "/api/adb/port", async request =>
             {
-                request.SendString(AdbWrapper.GetAdbWiFiPort().ToString());
+                var port = await AdbWrapper.GetAdbWiFiPortAsync();
+                request.SendString(port.ToString(), "text/plain");
                 return true;
             });
             server.AddRoute("POST", "/api/adb/connect", request =>
+            server.AddRoute("POST", "/api/adb/connect", async request =>
             {
-                AdbRequest r = JsonSerializer.Deserialize<AdbRequest>(request.bodyString);
+                var r = JsonConvert.DeserializeObject<dynamic>(request.bodyString);
                 try
                 {
-                    ExitInfo i = AdbWrapper.RunAdbCommand("connect 127.0.0.1:" + r.port);
-                    if(i.ExitCode != 0 || AdbWrapper.GetDevices().Count <= 0) throw new Exception("Failed to connect: " + i);
+                    var device = await AdbWrapper.ConnectAsync("127.0.0.1", int.Parse(r.port.ToString()));
                     request.SendString(GenericResponse.GetResponse("Connected with localhost ", true), "application/json");
                 }
                 catch (Exception e)
@@ -1543,10 +1547,11 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/togglewireless", request =>
+            server.AddRoute("POST", "/api/adb/togglewireless", async request =>
             {
                 try
                 {
-                    AdbWrapper.EnableAdbWiFi(true);
+                    await AdbWrapper.EnableAdbWiFiAsync(true);
                     request.SendString(GenericResponse.GetResponse("cycled wireless adb", true), "application/json");
                 }
                 catch (Exception e)
@@ -1556,27 +1561,29 @@ namespace QuestAppVersionSwitcher
                 return true;
             });
             server.AddRoute("POST", "/api/adb/makepersistent", request =>
+            server.AddRoute("POST", "/api/adb/makepersistent", async request =>
             {
                 try
                 {
-                    AdbWrapper.GrantPermissions();
-                    request.SendString(GenericResponse.GetResponse("Granted permissions", true), "application/json");
+                    await AdbWrapper.TcpIpModeAsync();
+                    request.SendString(GenericResponse.GetResponse("Made persistent", true), "application/json");
                 }
                 catch (Exception e)
                 {
-                    request.SendString(GenericResponse.GetResponse("Failed to grant permissions: " + e, false), "application/json");
+                    request.SendString(GenericResponse.GetResponse("Failed to make persistent: " + e, false), "application/json");
                 }
                 return true;
             });
             server.AddRoute("POST", "/api/adb/command", request =>
             {
-                
-                AdbRequest r = JsonSerializer.Deserialize<AdbRequest>(request.bodyString);
-                ExitInfo i = AdbWrapper.RunAdbCommand(r.command);
-                request.SendString(JsonSerializer.Serialize(i), "application/json");
+            server.AddRoute("POST", "/api/adb/command", async request =>
+            {
+                var r = JsonConvert.DeserializeObject<dynamic>(request.bodyString);
+                var result = await AdbWrapper.RunShellCommand(null, r.command.ToString());
+                request.SendString(JsonConvert.SerializeObject(result), "application/json");
                 return true;
             });
-			server.AddRouteFile("/facts.png", "facts.png");
+            server.AddRouteFile("/facts.png", "facts.png");
             try
             {
                 server.StartServer(CoreService.coreVars.serverPort);
@@ -1659,45 +1666,45 @@ namespace QuestAppVersionSwitcher
 
         public static string GetAPKPackageName(string path)
         {
-			// Is apk
-			MemoryStream manifestStream = new MemoryStream();
-			ZipArchive apkArchive = ZipFile.OpenRead(path);
-			apkArchive.GetEntry("AndroidManifest.xml").Open().CopyTo(manifestStream);
-			manifestStream.Position = 0;
-			AxmlElement manifest = AxmlLoader.LoadDocument(manifestStream);
-			string packageName = "";
-			foreach (AxmlAttribute a in manifest.Attributes)
-			{
-				if (a.Name == "package")
-				{
-					//Console.WriteLine("\nAPK Version is " + a.Value);
-					Logger.Log("package is " + a.Value);
-					packageName = a.Value.ToString();
-				}
-			}
+            // Is apk
+            MemoryStream manifestStream = new MemoryStream();
+            ZipArchive apkArchive = ZipFile.OpenRead(path);
+            apkArchive.GetEntry("AndroidManifest.xml").Open().CopyTo(manifestStream);
+            manifestStream.Position = 0;
+            AxmlElement manifest = AxmlLoader.LoadDocument(manifestStream);
+            string packageName = "";
+            foreach (AxmlAttribute a in manifest.Attributes)
+            {
+                if (a.Name == "package")
+                {
+                    //Console.WriteLine("\nAPK Version is " + a.Value);
+                    Logger.Log("package is " + a.Value);
+                    packageName = a.Value.ToString();
+                }
+            }
             return packageName;
-		}
+        }
 
-		public string GetAPKVersion(string path)
-		{
-			// Is apk
-			MemoryStream manifestStream = new MemoryStream();
-			ZipArchive apkArchive = ZipFile.OpenRead(path);
-			apkArchive.GetEntry("AndroidManifest.xml").Open().CopyTo(manifestStream);
-			manifestStream.Position = 0;
-			AxmlElement manifest = AxmlLoader.LoadDocument(manifestStream);
-			string version = "";
-			foreach (AxmlAttribute a in manifest.Attributes)
-			{
-				if (a.Name == "versionName")
-				{
-					//Console.WriteLine("\nAPK Version is " + a.Value);
-					Logger.Log("version is " + a.Value);
-					version = a.Value.ToString();
-				}
-			}
-			return version;
-		}
+        public string GetAPKVersion(string path)
+        {
+            // Is apk
+            MemoryStream manifestStream = new MemoryStream();
+            ZipArchive apkArchive = ZipFile.OpenRead(path);
+            apkArchive.GetEntry("AndroidManifest.xml").Open().CopyTo(manifestStream);
+            manifestStream.Position = 0;
+            AxmlElement manifest = AxmlLoader.LoadDocument(manifestStream);
+            string version = "";
+            foreach (AxmlAttribute a in manifest.Attributes)
+            {
+                if (a.Name == "versionName")
+                {
+                    //Console.WriteLine("\nAPK Version is " + a.Value);
+                    Logger.Log("version is " + a.Value);
+                    version = a.Value.ToString();
+                }
+            }
+            return version;
+        }
 
         public bool IsNameFileNameSafe(string name)
         {
